@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paradise Community</title>
+  <style>
+    :root{
+      --bg:#05091a; --accent1:#7c3aed; --accent2:#3b82f6; --muted:#94a3b8;
+      --glow1:0 0 30px rgba(124,58,237,0.4);
+      --glow2:0 0 30px rgba(59,130,246,0.4);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{height:100%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 20%, rgba(124,58,237,0.2), transparent),radial-gradient(circle at 80% 80%, rgba(59,130,246,0.2), transparent),var(--bg);color:white;font-family:Inter, system-ui, sans-serif;overflow:hidden;text-align:center;padding:20px}
+
+    .container{max-width:900px}
+
+    h1,h2,h3,p{opacity:0;transform:translateY(20px);animation:fadeUp 1s forwards;}
+    h1{font-size:42px;background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:var(--glow1),var(--glow2);}
+    h2{font-size:28px;color:#e0e7ff;margin-top:18px}
+    h3{font-size:22px;color:#cbd5e1;margin-top:16px}
+    p{font-size:18px;color:#94a3b8;margin-top:14px}
+
+    @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+
+    /* sequential delays */
+    .line1{animation-delay:0.4s}
+    .line2{animation-delay:1.4s}
+    .line3{animation-delay:2.4s}
+    .line4{animation-delay:3.4s}
+    .line5{animation-delay:4.4s}
+
+    .discord{display:inline-block;margin-top:22px;padding:12px 22px;border-radius:10px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;font-weight:700;text-decoration:none;box-shadow:var(--glow1),var(--glow2);animation:fadeUp 1s forwards;animation-delay:5.4s;opacity:0;transform:translateY(20px)}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="line1">About Paradise</h1>
+    <h2 class="line2">Members: 21,564</h2>
+    <h3 class="line3">What we offer:</h3>
+    <p class="line4">PARADISE AI, SCRIPTS, ACTIVE COMMUNITY FOR ROBLOX, GAG STOCK BOTS AND MUCH MORE</p>
+    <a href="https://discord.gg/paradiserbx" target="_blank" class="discord line5">Join Us Now — discord.gg/paradiserbx</a>
+  </div>
+</body>
+</html>
