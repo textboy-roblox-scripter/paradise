@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Staff Ticket Panel</title>
+  <style>
+    body { margin:0; font-family:Arial, sans-serif; background:#0a0a0f; color:#eee; text-align:center; padding:40px;}
+    h1 { color:#b084f5; }
+    button {
+      background:#5a2baf; color:white; border:none; padding:6px 14px;
+      border-radius:6px; cursor:pointer; font-size:14px; transition:0.3s;
+    }
+    button:hover { background:#783cd0; }
+    #tickets { margin-top:20px; }
+    .ticket {
+      background:#141421; border:1px solid #5a2baf; border-radius:8px;
+      padding:15px; margin:10px auto; max-width:500px; text-align:left;
+    }
+    #chat { margin-top:20px; text-align:left; border:1px solid #5a2baf;
+      padding:15px; border-radius:10px; background:#141421; max-width:500px; margin:auto;}
+    #messages { min-height:100px; margin-bottom:10px; }
+    #chat input { width:70%; padding:8px; border-radius:6px; border:none; }
+    #chat button { padding:8px 16px; }
+  </style>
+</head>
+<body>
+  <h1>Staff Ticket Panel</h1>
+  <div id="tickets"></div>
+
+  <div id="chat" style="display:none;">
+    <h2 id="chatTitle"></h2>
+    <div id="messages"></div>
+    <input type="text" id="staffMsg" placeholder="Type your reply..." />
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="closeTicket()">Close Ticket</button>
+  </div>
+
+  <script>
+    let activeTicketId = null;
+
+    function renderTickets() {
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let now = Date.now();
+
+      // auto-close if >10 min without staff reply
+      tickets.forEach(t => {
+        if (t.status === "open" && !t.lastStaffReply && now - t.created > 10*60*1000) {
+          t.status = "closed";
+          t.messages.push({from:"system", text:"Ticket auto-closed due to inactivity"});
+        }
+      });
+
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      let container = document.getElementById("tickets");
+      container.innerHTML = "";
+
+      tickets.forEach(t => {
+        if (t.status === "open") {
+          let div = document.createElement("div");
+          div.className = "ticket";
+          div.innerHTML = `
+            <p><b>User:</b> ${t.user}</p>
+            <p><b>Opened:</b> ${new Date(t.created).toLocaleTimeString()}</p>
+            <button onclick="doTicket(${t.id})">Do This Ticket</button>
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function doTicket(id) {
+      activeTicketId = id;
+      document.getElementById("chat").style.display = "block";
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === id);
+      document.getElementById("chatTitle").innerText = "Chat with " + t.user;
+      loadMessages();
+    }
+
+    function sendMessage() {
+      let input = document.getElementById("staffMsg");
+      let text = input.value.trim();
+      if (text === "") return;
+
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === activeTicketId && t.status === "open");
+      if (!t) return;
+
+      t.messages.push({from:"Staff", text});
+      t.lastStaffReply = Date.now();
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      input.value = "";
+      loadMessages();
+    }
+
+    function closeTicket() {
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === activeTicketId);
+      if (!t) return;
+
+      t.status = "closed";
+      t.messages.push({from:"system", text:"Ticket closed by staff"});
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      document.getElementById("chat").style.display = "none";
+      renderTickets();
+    }
+
+    function loadMessages() {
+      if (!activeTicketId) return;
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === activeTicketId);
+      if (!t) return;
+
+      let out = "";
+      t.messages.forEach(m => out += `<p><b>${m.from}:</b> ${m.text}</p>`);
+      document.getElementById("messages").innerHTML = out;
+    }
+
+    setInterval(() => { renderTickets(); loadMessages(); }, 2000);
+  </script>
+</body>
+</html>
