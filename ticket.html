@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Open Ticket</title>
+  <style>
+    body { margin:0; font-family:Arial, sans-serif; background:#0a0a0f; color:#eee; text-align:center; padding:40px;}
+    h1 { color:#b084f5; }
+    button {
+      background:#5a2baf; color:white; border:none; padding:12px 24px;
+      border-radius:8px; cursor:pointer; font-size:16px; transition:0.3s;
+    }
+    button:hover { background:#783cd0; }
+    #chat { display:none; margin-top:30px; text-align:left; border:1px solid #5a2baf;
+      padding:15px; border-radius:10px; background:#141421; max-width:500px; margin:auto;}
+    #messages { min-height:100px; margin-bottom:10px; }
+    #chat input { width:70%; padding:8px; border-radius:6px; border:none; }
+    #chat button { padding:8px 16px; }
+  </style>
+</head>
+<body>
+  <h1>Need help? Open a ticket</h1>
+  <button onclick="openTicket()">Open Ticket</button>
+
+  <div id="chat">
+    <h2>Your Ticket</h2>
+    <div id="messages"></div>
+    <input type="text" id="userMsg" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    let ticketId = null;
+    let username = "";
+
+    function openTicket() {
+      username = prompt("Enter your Discord username:");
+      if (!username) return;
+
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+
+      // max 10 tickets at once
+      if (tickets.filter(t => t.status === "open").length >= 10) {
+        alert("Max 10 tickets allowed at once. Try again later.");
+        return;
+      }
+
+      ticketId = Date.now(); // unique ID
+      let newTicket = {
+        id: ticketId,
+        user: username,
+        created: Date.now(),
+        status: "open",
+        messages: [{from:"system", text:`Ticket opened by ${username}`}],
+        lastStaffReply: null
+      };
+
+      tickets.push(newTicket);
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      document.getElementById("chat").style.display = "block";
+      loadMessages();
+    }
+
+    function sendMessage() {
+      let input = document.getElementById("userMsg");
+      let text = input.value.trim();
+      if (text === "") return;
+
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === ticketId && t.status === "open");
+      if (!t) return;
+
+      t.messages.push({from: username, text});
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+
+      input.value = "";
+      loadMessages();
+    }
+
+    function loadMessages() {
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      let t = tickets.find(t => t.id === ticketId);
+      if (!t) return;
+
+      let out = "";
+      t.messages.forEach(m => out += `<p><b>${m.from}:</b> ${m.text}</p>`);
+      document.getElementById("messages").innerHTML = out;
+
+      if (t.status === "closed") {
+        document.getElementById("messages").innerHTML += "<p><i>Ticket closed</i></p>";
+      }
+    }
+
+    setInterval(loadMessages, 1000);
+  </script>
+</body>
+</html>
